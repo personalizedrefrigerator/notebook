@@ -103,6 +103,20 @@ define([
                 }
             }
         });
+       	// iOS: this tells iOS to put the "Done" button on top of the picker
+        sel.focus(function() {
+			if (window.webkit.messageHandlers.Carnets != undefined) {
+				window.webkit.messageHandlers.Carnets.postMessage("selector active");
+			}
+			disable_scaling();
+		});         	
+        sel.blur(function() {
+			if (window.webkit.messageHandlers.Carnets != undefined) {
+				window.webkit.messageHandlers.Carnets.postMessage("selector inactive");
+			}
+			enable_scaling();
+		});         	
+		// end iOS changes
         sel.change(function () {
             var cell_type = $(this).val();
             switch (cell_type) {
@@ -125,6 +139,10 @@ define([
             default:
                 console.log(i18n.msg._("unrecognized cell type:"), cell_type);
             }
+			if (window.webkit.messageHandlers.Carnets != undefined) {
+				window.webkit.messageHandlers.Carnets.postMessage("selector inactive");
+			}
+			enable_scaling();
             that.notebook.focus_cell();
         });
         return sel;

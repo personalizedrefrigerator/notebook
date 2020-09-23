@@ -406,10 +406,21 @@ define([
             expand_time(time);
         });
 
+		// iOS: "focusout" event is called when we leave the page or go into background
+		window.onfocusout = function () {
+			if (that.dirty) {
+				that.save_notebook();
+			}
+			return;
+		}
 
         // Firefox 22 broke $(window).on("beforeunload")
         // I'm not sure why or how.
         window.onbeforeunload = function () {
+            // iOS note: onbeforeunload is not called with WkWebView or Safari. 
+			if (window.webkit.messageHandlers.Carnets != undefined) {
+				window.webkit.messageHandlers.Carnets.postMessage("beforeunload is called")
+			}
             /* Make kill kernel configurable.
             example in custom.js:
                 var notebook = Jupyter.notebook;
@@ -466,6 +477,20 @@ define([
 
     Notebook.prototype.show_command_palette = function() {
         new commandpalette.CommandPalette(this);
+    };
+
+	// iOS: allow access to external folder
+    Notebook.prototype.allow_folder_access = function() {
+		if (window.webkit.messageHandlers.Carnets != undefined) {
+			window.webkit.messageHandlers.Carnets.postMessage("allowFolderAccess");
+		}
+    };
+    
+    // iOS: open a specific webpage
+    Notebook.prototype.open_webpage = function() {
+		if (window.webkit.messageHandlers.Carnets != undefined) {
+			window.webkit.messageHandlers.Carnets.postMessage("openWebpage");
+		}
     };
 
     Notebook.prototype.show_shortcuts_editor = function() {
@@ -2426,17 +2451,31 @@ define([
         var buttons = {
             "Continue Running": {},
         };
-        // hook up button.click actions after restart promise resolves
-        Object.keys(options.dialog.buttons).map(function (key) {
-            var button = buttons[key] = options.dialog.buttons[key];
-            var click = button.click;
-            button.click = function () {
-                promise.then(click);
-                do_kernel_action();
-            };
-        });
-        options.dialog.buttons = buttons;
-        dialog.modal(options.dialog);
+		// iOS: make a custom iOS dialog:
+		var dialogTitle = options.dialog.title + "\n" + options.dialog.body.text() + "\n" + i18n.msg._("Continue Running") + "\n";
+		// Add label of action:
+		Object.keys(options.dialog.buttons).map(function (key) {
+			var button = options.dialog.buttons[key];
+			dialogTitle = dialogTitle + button.class + key;
+		}); 
+		if (confirm(dialogTitle)) {
+			var action_button = options.dialog.buttons[Object.keys(options.dialog.buttons)[0]];
+			promise.then(action_button.click);
+			do_kernel_action();
+		}
+		// iOS: comment original dialog.modal
+		// the variable "ios" is not available here.
+		// hook up button.click actions after restart promise resolves
+		// Object.keys(options.dialog.buttons).map(function (key) {
+		// 	var button = buttons[key] = options.dialog.buttons[key];
+		// 	var click = button.click;
+		// 	button.click = function () {
+		// 		promise.then(click);
+		// 		do_kernel_action();
+		// 	};
+		// });
+		// options.dialog.buttons = buttons;
+		// dialog.modal(options.dialog);
         return promise;
     };
 
@@ -2759,10 +2798,16 @@ define([
         var error;
         if (!this._fully_loaded) {
             error = new Error("Load failed, save is disabled");
+            if (window.webkit.messageHandlers.Carnets != undefined) {
+				window.webkit.messageHandlers.Carnets.postMessage("notebook_save_failed.Notebook: Load failed, save is disabled");
+			}
             this.events.trigger('notebook_save_failed.Notebook', error);
             return Promise.reject(error);
         } else if (!this.writable) {
             error = new Error("Notebook is read-only");
+            if (window.webkit.messageHandlers.Carnets != undefined) {
+				window.webkit.messageHandlers.Carnets.postMessage("notebook_save_failed.Notebook: Notebook is read-only");
+			}
             this.events.trigger('notebook_save_failed.Notebook', error);
             return Promise.reject(error);
         }
@@ -2784,6 +2829,9 @@ define([
             return that.contents.save(that.notebook_path, model).then(
                 $.proxy(that.save_notebook_success, that, start),
                 function (error) {
+					if (window.webkit.messageHandlers.Carnets != undefined) {
+						window.webkit.messageHandlers.Carnets.postMessage("notebook_save_failed.Notebook: " + error.message);
+					}
                     that.events.trigger('notebook_save_failed.Notebook', error);
                     // This hasn't handled the error, so propagate it up
                     return Promise.reject(error);
@@ -2801,6 +2849,10 @@ define([
                     // so we allow 0.5 seconds difference before complaining.
                     // This is configurable in nbconfig/notebook.json as `last_modified_check_margin`.
                     if ((last_modified.getTime() - that.last_modified.getTime()) > last_modified_check_margin) {  
+						if (window.webkit.messageHandlers.Carnets != undefined) {
+							window.webkit.messageHandlers.Carnets.postMessage("Last saving was done on `"+that.last_modified+"`("+that._last_modified+"), "+
+								"while the current file seem to have been saved on `"+data.last_modified+"`");
+						}
                         console.warn("Last saving was done on `"+that.last_modified+"`("+that._last_modified+"), "+
                                     "while the current file seem to have been saved on `"+data.last_modified+"`");
                         if (that._changed_on_disk_dialog !== null) {
@@ -2841,6 +2893,9 @@ define([
                     }
                 }, function () {
                     // maybe it has been deleted or renamed? Go ahead and save.
+					if (window.webkit.messageHandlers.Carnets != undefined) {
+						window.webkit.messageHandlers.Carnets.postMessage("notebook_save: missing notebook on file. Maybe it has been deleted or renamed? Go ahead and save");
+					}                 
                     return _save();
                 }
             );
@@ -2857,6 +2912,10 @@ define([
      */
     Notebook.prototype.save_notebook_success = function (start, data) {
         this.set_dirty(false);
+		// iOS: propagate the save to other applications (if open-in-place)
+		if (window.webkit.messageHandlers.Carnets != undefined) {
+			window.webkit.messageHandlers.Carnets.postMessage("save")
+		}
         this.last_modified = new Date(data.last_modified);
         // debug 484
         this._last_modified = 'save-success:'+data.last_modified;
@@ -2918,7 +2977,10 @@ define([
                 Save: {
                     class: 'btn-primary',
                     click: function() {
-                        var nb_path = d.find('input').val();
+                    	// iOS: need to convert these %20 back into spaces
+                        var nb_path = decodeURIComponent(d.find('input').val());
+                        // Original
+                        // var nb_path = d.find('input').val();
                         var nb_name = nb_path.split('/').slice(-1).pop();
                         if (!nb_name) {
                             $(".save-message").html(
@@ -2944,6 +3006,10 @@ define([
                             return that.contents.save(nb_path, model)
                                 .then(function(data) {
                                     d.modal('hide');
+									// iOS: warn iOS that a new file has been created
+									if (window.webkit.messageHandlers.Carnets != undefined) {
+										window.webkit.messageHandlers.Carnets.postMessage("create:/"+ data.path);
+									}
                                     that.writable = true;
                                     that.notebook_name = data.name;
                                     that.notebook_path = data.path;
@@ -3077,7 +3143,8 @@ define([
     Notebook.prototype.copy_notebook = function () {
         var that = this;
         var base_url = this.base_url;
-        var w = window.open('', IPython._target);
+        // iOS, Carnets: don't open a window until you know the URL
+        // var w = window.open('', IPython._target);
         var parent = utils.url_path_split(this.notebook_path)[0];
         var p;
         if (this.dirty && this.writable) {
@@ -3088,12 +3155,20 @@ define([
         return p.then(function () {
             return that.contents.copy(that.notebook_path, parent).then(
                 function (data) {
-                    w.location = utils.url_path_join(
+					// iOS: tell iOS that we have created a new notebook:
+					if (window.webkit.messageHandlers.Carnets != undefined) {
+						window.webkit.messageHandlers.Carnets.postMessage("create:/"+ data.path);
+					}
+                    url = utils.url_path_join(
                         base_url, 'notebooks', utils.encode_uri_components(data.path)
                     );
+                    var w = window.open(url);
+                    // w.location = utils.url_path_join(
+                    //     base_url, 'notebooks', utils.encode_uri_components(data.path)
+                    // );
                 },
                 function(error) {
-                    w.close();
+                    // w.close(); // iOS: no need to close that we didn't open
                     that.events.trigger('notebook_copy_failed', error);
                 }
             );
@@ -3123,6 +3198,10 @@ define([
         var that = this;
         var parent = utils.url_path_split(this.notebook_path)[0];
         var new_path = utils.url_path_join(parent, new_name);
+        // iOS: warn other applications of the renaming
+        if (window.webkit.messageHandlers.Carnets != undefined) {
+			window.webkit.messageHandlers.Carnets.postMessage("rename:" + "/" + new_path)
+		}
         return this.contents.rename(this.notebook_path, new_path).then(
             function (json) {
                 that.notebook_name = json.name;

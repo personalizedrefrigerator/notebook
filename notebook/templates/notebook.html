@@ -163,6 +163,8 @@ data-notebook-path="{{notebook_path | urlencode}}"
                 </li>
                 <li class="dropdown"><a href="#" class="dropdown-toggle" id="viewlink" data-toggle="dropdown" aria-haspopup="true" aria-controls="view_menu">{% trans %}View{% endtrans %}</a>
                     <ul id="view_menu" class="dropdown-menu" role="menu" aria-labelledby="viewlink">
+                    	<!-- iOS: comment these two; header is irrelevant, toolbar creates issues with phones
+						 (most likely WKWebView fault, but still)
                         <li id="toggle_header" role="none"
                             title="{% trans %}Show/Hide the logo and notebook title (above menu bar){% endtrans %}">
                             <a href="#" role="menuitem">{% trans %}Toggle Header{% endtrans %}</a>
@@ -171,6 +173,7 @@ data-notebook-path="{{notebook_path | urlencode}}"
                             title="{% trans %}Show/Hide the action icons (below menu bar){% endtrans %}">
                             <a href="#" role="menuitem">{% trans %}Toggle Toolbar{% endtrans %}</a>
                         </li>
+						-->
                         <li id="toggle_line_numbers" role="none"
                             title="{% trans %}Show/Hide line numbers in cells{% endtrans %}">
                             <a href="#" role="menuitem">{% trans %}Toggle Line Numbers{% endtrans %}</a>

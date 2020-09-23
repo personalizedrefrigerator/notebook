@@ -1,6 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+// iOS: We need to know if we are using a multi-char input language.
+
+var disable_scaling = function() {
+	// iOS: (ensure there is no auto-zoom on small iPhones)
+	var viewportmeta = document.querySelector('meta[name="viewport"]');
+	if (viewportmeta) {
+		viewportmeta.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0";
+	}
+}
+
+var enable_scaling = function() {
+	// iOS: (disable the previous change)
+	var viewportmeta = document.querySelector('meta[name="viewport"]');
+	if (viewportmeta) {
+		viewportmeta.content = "width=device-width, initial-scale=1.0";
+	}
+}
+
 
 var Jupyter = Jupyter || {};
 
