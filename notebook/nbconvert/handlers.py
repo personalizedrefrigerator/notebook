@@ -6,6 +6,9 @@
 import io
 import os
 import zipfile
+# iOS: sys to separate between OS X and iOS (both are "darwin")
+import sys
+import urllib.parse
 
 from tornado import gen, web, escape
 from tornado.log import app_log
@@ -42,6 +45,17 @@ def respond_zip(handler, name, output, resources):
     handler.set_attachment_header(zip_filename)
     handler.set_header('Content-Type', 'application/zip')
     handler.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+
+    # iOS: download the file that was created locally and return:
+    if (sys.platform == 'darwin' and os.uname().machine.startswith('iP')):
+        zipf = zipfile.ZipFile(zip_filename, mode='w', compression=zipfile.ZIP_DEFLATED)
+        output_filename = os.path.splitext(name)[0] + resources['output_extension']
+        zipf.writestr(output_filename, cast_bytes(output, 'utf-8'))
+        for filename, data in output_files.items():
+            zipf.writestr(os.path.basename(filename), data)
+        zipf.close()
+        handler.finish(zip_filename) # send back to the application the name of the file we have created
+        return True
 
     # Prepare the zip file
     buffer = io.BytesIO()
@@ -90,9 +104,16 @@ class NbconvertFileHandler(IPythonHandler):
     @gen.coroutine
     def get(self, format, path):
 
+        # iOS, remove '%20' and others in file name: 
+        if (sys.platform == 'darwin' and os.uname().machine.startswith('iP')):
+            unquotedPath = urllib.parse.unquote(path)
+            path = unquotedPath
+
         exporter = get_exporter(format, config=self.config, log=self.log)
 
-        path = path.strip('/')
+        # iOS: remove this line
+        if not (sys.platform == 'darwin' and os.uname().machine.startswith('iP')):
+            path = path.strip('/')
         # If the notebook relates to a real file (default contents manager),
         # give its path to nbconvert.
         if hasattr(self.contents_manager, '_get_os_path'):
@@ -136,6 +157,16 @@ class NbconvertFileHandler(IPythonHandler):
             raise web.HTTPError(500, "nbconvert failed: %s" % e) from e
 
         if respond_zip(self, name, output, resources):
+            return
+
+        # iOS: download the file that was created locally and return:
+        if (sys.platform == 'darwin' and os.uname().machine.startswith('iP')):
+            filename = os.path.splitext(name)[0] + resources['output_extension']
+            filename = ext_resources_dir + '/' + os.path.splitext(name)[0] + resources['output_extension']
+            if (format != 'ipynb'): 
+                file = open(filename, "w")
+                file.write(output)
+            self.finish(filename) # send back to the application the name of the file we have created
             return
 
         # Force download if requested
