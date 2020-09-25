@@ -418,7 +418,7 @@ define([
         // I'm not sure why or how.
         window.onbeforeunload = function () {
             // iOS note: onbeforeunload is not called with WkWebView or Safari. 
-			if (window.webkit.messageHandlers.Carnets != undefined) {
+			if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 				window.webkit.messageHandlers.Carnets.postMessage("beforeunload is called")
 			}
             /* Make kill kernel configurable.
@@ -481,14 +481,14 @@ define([
 
 	// iOS: allow access to external folder
     Notebook.prototype.allow_folder_access = function() {
-		if (window.webkit.messageHandlers.Carnets != undefined) {
+		if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 			window.webkit.messageHandlers.Carnets.postMessage("allowFolderAccess");
 		}
     };
     
     // iOS: open a specific webpage
     Notebook.prototype.open_webpage = function() {
-		if (window.webkit.messageHandlers.Carnets != undefined) {
+		if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 			window.webkit.messageHandlers.Carnets.postMessage("openWebpage");
 		}
     };
@@ -2798,14 +2798,14 @@ define([
         var error;
         if (!this._fully_loaded) {
             error = new Error("Load failed, save is disabled");
-            if (window.webkit.messageHandlers.Carnets != undefined) {
+            if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 				window.webkit.messageHandlers.Carnets.postMessage("notebook_save_failed.Notebook: Load failed, save is disabled");
 			}
             this.events.trigger('notebook_save_failed.Notebook', error);
             return Promise.reject(error);
         } else if (!this.writable) {
             error = new Error("Notebook is read-only");
-            if (window.webkit.messageHandlers.Carnets != undefined) {
+            if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 				window.webkit.messageHandlers.Carnets.postMessage("notebook_save_failed.Notebook: Notebook is read-only");
 			}
             this.events.trigger('notebook_save_failed.Notebook', error);
@@ -2829,7 +2829,7 @@ define([
             return that.contents.save(that.notebook_path, model).then(
                 $.proxy(that.save_notebook_success, that, start),
                 function (error) {
-					if (window.webkit.messageHandlers.Carnets != undefined) {
+					if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 						window.webkit.messageHandlers.Carnets.postMessage("notebook_save_failed.Notebook: " + error.message);
 					}
                     that.events.trigger('notebook_save_failed.Notebook', error);
@@ -2849,7 +2849,7 @@ define([
                     // so we allow 0.5 seconds difference before complaining.
                     // This is configurable in nbconfig/notebook.json as `last_modified_check_margin`.
                     if ((last_modified.getTime() - that.last_modified.getTime()) > last_modified_check_margin) {  
-						if (window.webkit.messageHandlers.Carnets != undefined) {
+						if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 							window.webkit.messageHandlers.Carnets.postMessage("Last saving was done on `"+that.last_modified+"`("+that._last_modified+"), "+
 								"while the current file seem to have been saved on `"+data.last_modified+"`");
 						}
@@ -2893,7 +2893,7 @@ define([
                     }
                 }, function () {
                     // maybe it has been deleted or renamed? Go ahead and save.
-					if (window.webkit.messageHandlers.Carnets != undefined) {
+					if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 						window.webkit.messageHandlers.Carnets.postMessage("notebook_save: missing notebook on file. Maybe it has been deleted or renamed? Go ahead and save");
 					}                 
                     return _save();
@@ -2913,7 +2913,7 @@ define([
     Notebook.prototype.save_notebook_success = function (start, data) {
         this.set_dirty(false);
 		// iOS: propagate the save to other applications (if open-in-place)
-		if (window.webkit.messageHandlers.Carnets != undefined) {
+		if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 			window.webkit.messageHandlers.Carnets.postMessage("save")
 		}
         this.last_modified = new Date(data.last_modified);
@@ -3007,7 +3007,7 @@ define([
                                 .then(function(data) {
                                     d.modal('hide');
 									// iOS: warn iOS that a new file has been created
-									if (window.webkit.messageHandlers.Carnets != undefined) {
+									if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 										window.webkit.messageHandlers.Carnets.postMessage("create:/"+ data.path);
 									}
                                     that.writable = true;
@@ -3156,7 +3156,7 @@ define([
             return that.contents.copy(that.notebook_path, parent).then(
                 function (data) {
 					// iOS: tell iOS that we have created a new notebook:
-					if (window.webkit.messageHandlers.Carnets != undefined) {
+					if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 						window.webkit.messageHandlers.Carnets.postMessage("create:/"+ data.path);
 					}
                     url = utils.url_path_join(
@@ -3199,7 +3199,7 @@ define([
         var parent = utils.url_path_split(this.notebook_path)[0];
         var new_path = utils.url_path_join(parent, new_name);
         // iOS: warn other applications of the renaming
-        if (window.webkit.messageHandlers.Carnets != undefined) {
+        if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 			window.webkit.messageHandlers.Carnets.postMessage("rename:" + "/" + new_path)
 		}
         return this.contents.rename(this.notebook_path, new_path).then(

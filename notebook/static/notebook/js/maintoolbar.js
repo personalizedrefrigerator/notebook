@@ -60,7 +60,10 @@ define([
          ['<add_celltype_list>'],
          [
            ['jupyter-notebook:show-command-palette'],
-           'cmd_palette']
+           'cmd_palette'],
+			[['jupyter-notebook:open-webpage'], 'open_webpage'], 
+			[['jupyter-notebook:allow-folder-access'], 'allow_folder_access']
+           	
         ];
         this.construct(grps);
     };
@@ -105,13 +108,13 @@ define([
         });
        	// iOS: this tells iOS to put the "Done" button on top of the picker
         sel.focus(function() {
-			if (window.webkit.messageHandlers.Carnets != undefined) {
+			if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 				window.webkit.messageHandlers.Carnets.postMessage("selector active");
 			}
 			disable_scaling();
 		});         	
         sel.blur(function() {
-			if (window.webkit.messageHandlers.Carnets != undefined) {
+			if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 				window.webkit.messageHandlers.Carnets.postMessage("selector inactive");
 			}
 			enable_scaling();
@@ -139,7 +142,7 @@ define([
             default:
                 console.log(i18n.msg._("unrecognized cell type:"), cell_type);
             }
-			if (window.webkit.messageHandlers.Carnets != undefined) {
+			if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 				window.webkit.messageHandlers.Carnets.postMessage("selector inactive");
 			}
 			enable_scaling();

@@ -171,7 +171,7 @@ define([
                 // var w = window.open('', IPython._target);
                 that.contents.new_untitled(that.notebook_path || '', {type: 'file', ext: '.txt'}).then(function(data) {
                     // iOS, Carnets: warn Carnets that we have created something
-                    if (window.webkit.messageHandlers.Carnets != undefined) {
+                    if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
                         window.webkit.messageHandlers.Carnets.postMessage("create:/"+data.path);
 					}
                     var url = utils.url_path_join(
@@ -186,7 +186,7 @@ define([
                 }).catch(function (e) {
                     // w.close();
                     // iOS, Carnets: warn iOS that there is an exception
-                    if (window.webkit.messageHandlers.Carnets != undefined) {
+                    if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
                         window.webkit.messageHandlers.Carnets.postMessage("exception:fileCreateFailed " + e); 
 					}
                     dialog.modal({
@@ -1026,7 +1026,7 @@ define([
                 encodeURIComponent(session.id)
             );
             /* iOS: send notice to Carnets that this kernel is killed */
-            if (window.webkit.messageHandlers.Carnets != 'undefined') {
+            if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != 'undefined') {
 				window.webkit.messageHandlers.Carnets.postMessage("killingSession:" + url)            
 			}
             utils.ajax(url, settings);
@@ -1088,7 +1088,7 @@ define([
                     click: function() {
                         that.contents.rename(item_path, utils.url_path_join(that.notebook_path, input.val())).then(function() {
 							// iOS, Carnets: warn the system that the file is renamed
-							if (window.webkit.messageHandlers.Carnets != undefined) {
+							if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 								window.webkit.messageHandlers.Carnets.postMessage("renameFile:" + encodeURIComponent("/" + item_path) + " " + encodeURIComponent(new_path))
 							}
                             that.load_list();
@@ -1249,6 +1249,9 @@ define([
                         // Delete selected.
                         selected.forEach(function(item) {
                             that.contents.delete(item.path).then(function() {
+								if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
+								    window.webkit.messageHandlers.Carnets.postMessage("delete:/" + item.path);
+								}
                                     that.notebook_deleted(item.path);
                             }).catch(function(e) {
                             	var failmsg = i18n.msg._("An error occurred while deleting \"%s\".");
@@ -1312,7 +1315,7 @@ define([
                         selected.forEach(function(item) {
                             that.contents.copy(item.path, that.notebook_path).then(function () {
 								// iOS, Carnets: warn iOS that a new file has been created
-								if (window.webkit.messageHandlers.Carnets != undefined) {
+								if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 									window.webkit.messageHandlers.Carnets.postMessage("create:/"+ data.path);
 								}
                                 that.load_list();
@@ -1512,7 +1515,7 @@ define([
                                     that.session_list.load_sessions();
                                 }
 								// iOS: tell iOS that we have created a file (not called, but stil left):
-								if (window.webkit.messageHandlers.Carnets != undefined) {
+								if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 									window.webkit.messageHandlers.Carnets.postMessage("create:/" + model.path);
 								}
 								// 
@@ -1619,7 +1622,7 @@ define([
 
                 var on_success = function () {
 					// iOS, Carnets: warn the system that we created a new file:
-					if (window.webkit.messageHandlers.Carnets != undefined) {
+					if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 						window.webkit.messageHandlers.Carnets.postMessage("create:/" + path);                	
 					}
                     item.removeClass('new-file');

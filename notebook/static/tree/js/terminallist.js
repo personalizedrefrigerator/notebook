@@ -57,7 +57,7 @@ define([
                 // iOS:
                 var urlw = utils.url_path_join(base_url, 'terminals', 
                     utils.encode_uri_components(name));
-                if (window.webkit.messageHandlers.Carnets != undefined) {
+                if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 					window.webkit.messageHandlers.Carnets.postMessage(urlw); 
 				}
                 var w = window.open(urlw);

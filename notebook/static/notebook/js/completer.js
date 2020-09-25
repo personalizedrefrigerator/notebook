@@ -252,7 +252,7 @@ define([
             this.complete = $('<div/>').addClass('completions');
             this.complete.attr('id', 'complete');
 			// iOS: change keyboard extension, disable scaling (not always working)
-			if (window.webkit.messageHandlers.Carnets != undefined) {
+			if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 				window.webkit.messageHandlers.Carnets.postMessage("selector active")
 			}
 			disable_scaling();
@@ -275,7 +275,7 @@ define([
             // this.sel.click(function () { // fails 
             this.sel.change(function () { // works on iOS 13
                 that.pick();
-				if (window.webkit.messageHandlers.Carnets != undefined) {
+				if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 					window.webkit.messageHandlers.Carnets.postMessage("selector inactive");
 				}
 				enable_scaling();
@@ -335,7 +335,7 @@ define([
         this.editor.off('keydown', this._handle_keydown);
         this.editor.off('keypress', this._handle_keypress);
         this.visible = false;
-		if (window.webkit.messageHandlers.Carnets != undefined) {
+		if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 			window.webkit.messageHandlers.Carnets.postMessage("selector inactive");
 		}
     };
@@ -364,7 +364,7 @@ define([
         var options;
         var index;
         if (code == keycodes.enter) {
-			if (window.webkit.messageHandlers.Carnets != undefined) {
+			if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 				window.webkit.messageHandlers.Carnets.postMessage("enter key received");
 			}
             event.codemirrorIgnore = true;

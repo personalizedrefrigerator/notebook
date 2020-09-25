@@ -58,7 +58,7 @@ define([
                     //     that.base_url, 'edit', utils.encode_uri_components(data.path)
                     // );
 					// iOS, Carnets: warn other apps that we have created a file
-					if (window.webkit.messageHandlers.Carnets != undefined) {
+					if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 						window.webkit.messageHandlers.Carnets.postMessage("create:/"+data.path);
 					}
 					// iOS: now that we have an URL, open the window

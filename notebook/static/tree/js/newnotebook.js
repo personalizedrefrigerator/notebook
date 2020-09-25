@@ -79,13 +79,14 @@ define([
         /** create and open a new notebook */
         var that = this;
         kernel_name = kernel_name || this.default_kernel;
-        if (window.webkit.messageHandlers.Carnets != undefined) {
+        if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 			window.webkit.messageHandlers.Carnets.postMessage("new_notebook"); 
 		}
 		// iOS: don't open a window until you know the URL
         // var w = window.open(undefined, IPython._target);
         // var dir_path = $('body').attr('data-notebook-path');
         // iOS: need to decode URI before opening directory:
+        var dir_path = decodeURIComponent( $('body').attr('data-notebook-path'));
         this.contents.new_untitled(dir_path, {type: "notebook"}).then(
             function (data) {
                 var url = utils.url_path_join(
@@ -95,16 +96,18 @@ define([
                     // utils.encode_uri_components(data.path)
                 );
                 // iOS: warn iOS that we have created a notebook
-				if (window.webkit.messageHandlers.Carnets != undefined) {
+				if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 					window.webkit.messageHandlers.Carnets.postMessage("create:/"+data.path);
 				}             
                 if (kernel_name) {
                     url += "?kernel_name=" + kernel_name;
                 }
-                w.location = url;
+                // iOS: we open the webView only once we have the actual URL:
+                var w = window.open(url)
+                // w.location = url;
         }).catch(function (e) {
             // w.close(); // iOS: the window was not opened.
-			if (window.webkit.messageHandlers.Carnets != undefined) {
+			if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 				window.webkit.messageHandlers.Carnets.postMessage("exception:NotebookCreationFailed"); 
 			}
             // This statement is used simply so that message extraction

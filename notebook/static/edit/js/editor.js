@@ -256,7 +256,7 @@ function(
             that.events.trigger("file_saving.Editor");
             return that.contents.save(that.file_path, model).then(function(data) {
             	// iOS: propagate the save to other applications (if open-in-place)
-				if (window.webkit.messageHandlers.Carnets != undefined) {
+				if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 					window.webkit.messageHandlers.Carnets.postMessage("save")
 				}
                 // record change generation for isClean
@@ -312,7 +312,7 @@ function(
                                         click: function () {
                                         	// iOS: this causes a crash in UI
                                             _save();
-											if (window.webkit.messageHandlers.Carnets != undefined) {
+											if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 												window.webkit.messageHandlers.Carnets.postMessage("We returned from _save");
 											}
                                             window.location.reload();

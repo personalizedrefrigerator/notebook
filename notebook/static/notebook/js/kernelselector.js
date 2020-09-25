@@ -308,7 +308,7 @@ define([
         that.notebook.contents.new_untitled(parent, {type: "notebook"}).then(
             function (data) {
                 // iOS: warn iOS that we have created a notebook
-				if (window.webkit.messageHandlers.Carnets != undefined) {
+				if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 					window.webkit.messageHandlers.Carnets.postMessage("create:/"+data.path);
 				}
                 var url = utils.url_path_join(
@@ -323,7 +323,7 @@ define([
             },
             function(error) {
                 // w.close(); // iOS: no need to close that which we didn't open
-				if (window.webkit.messageHandlers.Carnets != undefined) {
+				if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 					window.webkit.messageHandlers.Carnets.postMessage("exception:prototype.new_notebook"); 
 				}
                 dialog.modal({

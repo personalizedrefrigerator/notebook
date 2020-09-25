@@ -115,13 +115,13 @@ define([
         // var w = window.open('', IPython._target);
         if (this.notebook.dirty && this.notebook.writable) {
             this.notebook.save_notebook().then(function() {
-            	if (window.webkit.messageHandlers.Carnets != undefined) {
+            	if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 					window.webkit.messageHandlers.Carnets.postMessage("convertFile:"+ url);
 				}
                 // w.location = url;
             });
         } else {
-			if (window.webkit.messageHandlers.Carnets != undefined) {
+			if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 				window.webkit.messageHandlers.Carnets.postMessage("convertFile:"+ url);
 			}
             // w.location = url;

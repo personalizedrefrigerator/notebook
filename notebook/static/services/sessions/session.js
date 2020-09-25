@@ -197,7 +197,7 @@ define([
         }
 
 		/* iOS: send notice to Carnets that this kernel is killed */
-        if (window.webkit.messageHandlers.Carnets != undefined) {
+        if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 			window.webkit.messageHandlers.Carnets.postMessage("killingSession:" + this.session_url)
 		}
         utils.ajax(this.session_url, {
@@ -270,7 +270,7 @@ define([
             this.id = data.id;
             this.session_url = utils.url_path_join(this.session_service_url, this.id);
             /* iOS: send notice to Carnets that this kernel is created */
-			if (window.webkit.messageHandlers.Carnets != undefined) {
+			if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
 				window.webkit.messageHandlers.Carnets.postMessage("loadingSession:" + this.session_url)
 			}
         }

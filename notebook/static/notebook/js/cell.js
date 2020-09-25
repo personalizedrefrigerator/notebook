@@ -409,7 +409,7 @@ define([
     Cell.prototype.command_mode = function () {
         if (this.mode !== 'command') {
         	// iOS: only activate caps-lock in edit mode
-			if (window.webkit.messageHandlers.Carnets != undefined) { 
+			if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) { 
 				window.webkit.messageHandlers.Carnets.postMessage("commandMode");
 			}
             this.mode = 'command';
@@ -427,7 +427,7 @@ define([
     Cell.prototype.edit_mode = function () {
         if (this.mode !== 'edit') {
         	// iOS: only activate caps-lock in edit mode
-			if (window.webkit.messageHandlers.Carnets != undefined) { 
+			if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) { 
 				window.webkit.messageHandlers.Carnets.postMessage("editMode");
 			}
             this.mode = 'edit';
