@@ -233,6 +233,7 @@ define([
         var id_actions_dict = {
             '#trust_notebook' : 'trust-notebook',
             '#rename_notebook' : 'rename-notebook',
+            '#find' : 'find',
             '#find_and_replace' : 'find-and-replace',
             '#save_checkpoint': 'save-notebook',
             '#shutdown_kernel': 'confirm-shutdown-kernel',

@@ -208,6 +208,10 @@ define([
         var button_labels = [ i18n.msg._("Don't Restart"), i18n.msg._("Try Restarting Now"), i18n.msg._("OK")];
 			// iOS: present a standard alert, and a more explicit message:
 			// No alert at all? 
+			// iOS: present a standard alert, and a more explicit message. Also warn the application:
+			if (window.webkit != undefined && window.webkit.messageHandlers.Carnets != undefined) {
+				window.webkit.messageHandlers.Carnets.postMessage("restartServer:/"+data.path);
+			}			
 			var msg =  i18n.msg._("Restarting server") + "\n" + 
 				i18n.msg._("We are restarting the Jupyter server and client.");
 			alert(msg);

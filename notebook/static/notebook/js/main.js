@@ -51,7 +51,7 @@ requirejs([
     'codemirror/lib/codemirror',
     'notebook/js/about',
     'notebook/js/searchandreplace',
-    'notebook/js/search',    
+    'notebook/js/search',
     'notebook/js/clipboard',
     'bidi/bidi',
     'notebook/js/celltoolbarpresets/tags'
