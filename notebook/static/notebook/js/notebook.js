@@ -802,6 +802,33 @@ define([
         return result;
     };
 
+	/*
+	 * For faster find, if the user clicks on a line, we go to the corresponding cell.
+	 * (useful for iOS since the usual ctrl-F won't work here)
+	 */
+	Notebook.prototype.select_cell_for_line = function(line) {
+		cells = this.get_cells();
+
+		var lines_passed = 0;
+		for (var c = 0; c < cells.length; c++) {
+			var arr = cells[c].code_mirror.getValue().split('\n');
+			lines_passed += arr.length;
+			if (lines_passed > line) {
+			    var lines_down = line - (lines_passed - arr.length);
+			    cells[c].focus_cell();
+				cells[c].code_mirror.execCommand('goDocStart');
+			    if (lines_down > 0) {
+					for (var i=0; i < lines_down; i++) {
+						cells[c].code_mirror.execCommand('goLineDown');
+					}
+				}
+				$('#modal').modal('hide');
+				$('.close').click(); // close the searchAndReplace window
+				this.edit_mode();
+				break; 
+			}
+		}
+	}
 
     /**
      * Get the currently selected cell.
