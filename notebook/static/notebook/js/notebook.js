@@ -807,6 +807,7 @@ define([
 	 * (useful for iOS since the usual ctrl-F won't work here)
 	 */
 	Notebook.prototype.select_cell_for_line = function(line) {
+		$('.close').click(); // close the searchAndReplace window
 		cells = this.get_cells();
 
 		var lines_passed = 0;
@@ -822,8 +823,7 @@ define([
 						cells[c].code_mirror.execCommand('goLineDown');
 					}
 				}
-				$('#modal').modal('hide');
-				$('.close').click(); // close the searchAndReplace window
+			    cells[c].focus_cell();
 				this.edit_mode();
 				break; 
 			}

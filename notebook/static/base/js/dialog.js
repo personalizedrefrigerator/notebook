@@ -131,7 +131,8 @@ define(['jquery',
             }
             if (options.keyboard_manager) {
                 options.keyboard_manager.enable();
-                options.keyboard_manager.command_mode();
+                // iOS: the modal can have transferred focus to a cell, in edit_mode.
+                // options.keyboard_manager.command_mode();
             }
 	    if (options.focus_button) {
             	$(options.focus_button).focus();
