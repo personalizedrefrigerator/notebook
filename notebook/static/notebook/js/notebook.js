@@ -806,7 +806,7 @@ define([
 	 * For faster find, if the user clicks on a line, we go to the corresponding cell.
 	 * (useful for iOS since the usual ctrl-F won't work here)
 	 */
-	Notebook.prototype.select_cell_for_line = function(line) {
+	Notebook.prototype.select_cell_for_line = function(line, position) {
 		$('.close').click(); // close the searchAndReplace window
 		cells = this.get_cells();
 
@@ -821,6 +821,11 @@ define([
 			    if (lines_down > 0) {
 					for (var i=0; i < lines_down; i++) {
 						cells[c].code_mirror.execCommand('goLineDown');
+					}
+				}
+				if (position > 0) {
+					for (var i=0; i < position; i++) {
+						cells[c].code_mirror.execCommand('goCharRight');
 					}
 				}
 			    cells[c].focus_cell();

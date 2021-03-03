@@ -85,7 +85,7 @@ define([
       pre.append(html[rindex][3]);
       if (allCells) {
 		  var link = $('<a/>');
-		  link.attr('href', 'javascript:{Jupyter.notebook.select_cell_for_line(' + html[rindex][4] + ');}');
+		  link.attr('href', 'javascript:{Jupyter.notebook.select_cell_for_line(' + html[rindex][4] + ', ' + html[rindex][0].length + ');}');
 		  link.html(pre);
 		  body.append(link);
 	  } else {
