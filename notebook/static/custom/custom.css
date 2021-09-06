@@ -36,9 +36,8 @@ License: BSD
 	:root {
 		--special-text-color: hsla(60, 50%, 70%, 0.75);
 		--border-color: white;
-		color: #f0f0f0;
 	}
-	body {
+	body, :root {
 		background-color: #2b303b;
 		background: #2b303b;
 		color: #f0f0f0;
